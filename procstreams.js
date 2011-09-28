@@ -63,6 +63,7 @@ function normalizeArguments(cmd, args, opts, callback) {
   } else {
     opts = {}
   }
+  if(!opts.env) { opts.env = process.env; }
 
   var parsedArgs
    , val;
