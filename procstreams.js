@@ -1,7 +1,7 @@
 var spawn = require('child_process').spawn
   , slice = Array.prototype.slice;
 
-function procPipe(dest, options, callback) {
+function procPipe(dest, options) {
   options = options || {}
 
   var source = this
@@ -29,8 +29,6 @@ function procPipe(dest, options, callback) {
     // emitting end on the source pipes should trigger cleanup routines
     source.stdout.emit('end');
     source.stderr.emit('end');
-
-    if(typeof callback == 'function') { callback(exit, signal); }
   }
 
   source.on('exit', onexit);
@@ -155,7 +153,15 @@ function procStream(cmd, args, opts, callback) {
     });
   }
 
-  child.pipe = procPipe;
+  child.pipe = function(cmd, args, options) {
+    var source = child
+      , dest = procStream.apply(null, arguments);
+
+    if(typeof args != 'string' && !Array.isArray(args)) {
+      options = args;
+    }
+    return procPipe.call(source, dest, options);
+  }
 
   if(opts.out !== false) {
     child.out();
