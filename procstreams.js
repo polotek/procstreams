@@ -54,7 +54,7 @@ function normalizeArguments(cmd, args, opts, callback) {
   }
 
   if(opts) {
-    if(typeof opts == 'fuction') {
+    if(typeof opts == 'function') {
       callback = opts;
       opts = {}
     }
@@ -79,7 +79,7 @@ function normalizeArguments(cmd, args, opts, callback) {
     if(typeof args == 'string') { args = parseArgs(args); }
 
     parsedArgs = cmd.concat(args);
-    cmd = parsedArgs.unshift();
+    cmd = parsedArgs.shift();
   } else {
     throw new Error('Invalid command');
   }
