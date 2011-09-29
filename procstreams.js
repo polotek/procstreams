@@ -111,18 +111,19 @@ function procStream(cmd, args, opts, callback) {
 
   child.out = function out() {
     if(child._out) { return; }
-
     child._out = true;
-    this.stdout.pipe(process.stdout);
-    this.stderr.pipe(process.stderr);  
+
+    var opts = { end: false }
+    child.stdout.pipe(process.stdout, opts);
+    child.stderr.pipe(process.stderr, opts);
   }
 
   child.and = function and() {
-    var source = this
+    var source = child
      , args = slice.call(arguments);
 
     source.on('exit', function(exit, signal) {
-      if(!exit && !signal) {
+      if(exit === 0) {
         process.nextTick(function() {
           procStream.apply(null, args);
         });
@@ -131,20 +132,27 @@ function procStream(cmd, args, opts, callback) {
   }
 
   child.or = function or() {
-    var source = this
+    var source = child
      , args = slice.call(arguments);
 
     source.on('exit', function(exit, signal) {
-      if(exit || signal) {
+      if(exit !== 0) {
         process.nextTick(function() {
-          procStream.apply(null, arguments);
+          procStream.apply(null, args);
         });
       }
     });    
   }
 
   child.then = function then() {
-    return procStream.apply(null, arguments);
+    var source = child
+      , args = slice.call(arguments);
+
+    source.on('exit', function(exit, signal) {
+      process.nextTick(function() {
+        procStream.apply(null, args);
+      });
+    });
   }
 
   child.pipe = procPipe;
