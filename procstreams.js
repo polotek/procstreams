@@ -114,6 +114,8 @@ function procStream(cmd, args, opts, callback) {
     var opts = { end: false }
     child.stdout.pipe(process.stdout, opts);
     child.stderr.pipe(process.stderr, opts);
+
+    return child;
   }
 
   child.and = function and() {
@@ -139,7 +141,7 @@ function procStream(cmd, args, opts, callback) {
           procStream.apply(null, args);
         });
       }
-    });    
+    });
   }
 
   child.then = function then() {
