@@ -115,7 +115,7 @@ function procStream(cmd, args, opts, callback) {
     child.stdout.pipe(process.stdout, opts);
     child.stderr.pipe(process.stderr, opts);
 
-    return child;
+    return this;
   }
 
   child.and = function and() {
