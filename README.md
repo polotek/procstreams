@@ -36,7 +36,7 @@ It receives the same arguments as the child process exit callback
 
 ### options
 
-The options object supports all of the options from [`child_process.spawn`](http://nodejs.org/docs/v0.6.5/api/child_processes.html#child_process.spawn) plus 
+The options object supports all of the options from [`child_process.spawn`](http://nodejs.org/docs/v0.6.5/api/child_processes.html#child_process.spawn) plus
 a few additions specific to procstream
 
 `out` - Boolean that determines if the proc output is directed to the main
