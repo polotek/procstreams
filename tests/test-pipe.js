@@ -19,7 +19,7 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
     assert.equal('5', output.trim())
 
   $p('cat tests/fixtures/10lines.txt', opts)
-    .pipe('grep "even"', opts)
+    .pipe('grep even', opts)
     .pipe('wc -l', opts)
       .stdout.on('data', function(output) {
         assert.equal('5', output.toString().trim())
