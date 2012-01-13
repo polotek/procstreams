@@ -2,5 +2,6 @@ FAILS=0
 for i in tests/test-*.js; do
   echo $i
   node $i || let FAILS++
+  echo "------"
 done
-exit $FAILS
+echo "\n$FAILS tests failed"
