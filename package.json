@@ -6,6 +6,9 @@
   , "keywords": ["pipe", "child process", "command line", "cli"]
   , "author": "polotek (Marco Rogers)"
   , "main": "./procstreams.js"
+  , "dependencies": {
+    "inherits": "1"
+  }
   , "engines": {
       "node": "0.4 || 0.6"
     }
