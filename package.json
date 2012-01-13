@@ -1,12 +1,15 @@
 {
   "name": "procstreams"
+  , "version": "0.0.1"
   , "description": "Enable nicer shell scripting with node by extending the stream interface to child processes"
   , "url": "https://github.com/polotek/procstreams"
   , "keywords": ["pipe", "child process", "command line", "cli"]
-  , "author": "polotek <https://github.com/polotek"
+  , "author": "polotek (Marco Rogers)"
   , "main": "./procstreams.js"
-  , "version": "0.0.1"
   , "engines": {
-      "node": "0.4.x 0.6.x" 
+      "node": "0.4 || 0.6"
     }
+  , "scripts": {
+    "test": "tests/run_tests.sh"
+  }
 }
