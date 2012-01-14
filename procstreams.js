@@ -2,7 +2,8 @@ var slice = Array.prototype.slice
   , EventEmitter = require('events').EventEmitter
   , spawn = require('child_process').spawn
   , inherits = require('inherits')
-  , utils = require('./protochains');
+  , utils = require('./protochains')
+  , Collector = require('./collector').Collector;
 
 function procPipe(dest, options) {
   options = options || {}
@@ -87,6 +88,17 @@ function normalizeArguments(cmd, args, opts, callback) {
   }
 }
 
+function collect() {
+  var stdout = this.stdout.pipe(new Collector())
+    , stderr = this.stderr.pipe(new Collector());
+
+  this.on('exit', function(err, signal) {
+    if(err === 0) {
+      this.emit('_output', stdout.data, stderr.data);
+    }
+  }.bind(this));
+}
+
 function procStream(cmd, args, opts, callback) {
   if(!cmd) { throw new Error('Missing command'); }
 
@@ -121,6 +133,8 @@ function procStream(cmd, args, opts, callback) {
 
   if(typeof callback == 'function') { proc.on('exit', callback); }
 
+  // TODO: This should be immediate instead of nextTick. But it fails
+  // for some reason
   process.nextTick(function() { proc.emit('start'); });
   return proc;
 }
@@ -135,6 +149,10 @@ procStream._prototype = {
     this.stderr.pipe(process.stderr, opts);
 
     return this;
+  }
+  , data: function data(fn) {
+    this.on('_output', fn);
+    this.once('start', collect)
   }
   , and: function and() {
     var args = slice.call(arguments)
