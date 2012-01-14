@@ -6,33 +6,32 @@
 // exit $FAILS
 
 var fs = require('fs')
-	, $p = require(__dirname + '/..');
+  , $p = require(__dirname + '/..');
 
 fs.readdir('tests', function(err, testFiles) {
-	if(err) {
-		console.error('Could not read test files');
-		throw err;
-	}
+  if(err) {
+    console.error('Could not read test files');
+    throw err;
+  }
 
-	var chain, fails = 0;
-	testFiles
-		.filter(function(file) { return /^test-[a-zA-Z_.-]+\.js$/.test(file); })
-		.forEach(function(file, idx) {
-			console.log(file);
-			// add each test run to the pipe chain
-			var path = 'tests/' + file;
-			chain = chain ? chain.then('node', path) : $p('node', path);
-			chain.on('exit', function(code) {
-				if(code) {
-					fails++;
-				}
-			}).out();
-		});
-	// chain now has a pipe of all test files ready to be run sequentially
-	chain.on('exit', function() {
-		if(fails) {
-			console.error('\n' + fails + ' failed');
-			process.exit(fails);
-		}
-	});
+  var chain, fails = 0;
+  testFiles
+    .filter(function(file) {
+        return /^test-[a-zA-Z_.-]+\.js$/.test(file);
+      })
+    .forEach(function(file, idx) {
+      console.log(file + '\n------');
+      // add each test run to the pipe chain
+      var path = 'tests/' + file;
+      chain = chain ? chain.then('node', path) : $p('node', path);
+      chain.on('exit', function(code) {
+        if(code) {
+          fails++;
+        }
+      });
+    });
+  // chain now has a pipe of all test files ready to be run sequentially
+  chain.on('exit', function() {
+    console.log('\n' + fails + ' tests failed');
+  });
 });
