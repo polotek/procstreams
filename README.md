@@ -17,13 +17,13 @@ unix command line scripting.
           console.log('done');
         });
 
-### procstream function
+## procstream function
 
 The procstream function is the main entry point which creates a child
 process that's pipeable and composable. It takes arguments in several
-formats.
+formats. It returns a `ProcStream` object that represents the child process.
 
-**procstream(cmd, argsArray, options, callback)**
+    procstream(cmd, argsArray, options, callback)
 
 `cmd` can be the name of the command, or an array of strings with cmd and args
 or a string of cmd + args.
@@ -35,11 +35,10 @@ or a string of cmd + args.
 `callback` (optional) callback to be called on the "exit" event from the proc.
 It receives the same arguments as the child process exit callback
 
-
 ### options
 
 The options object supports all of the options from [`child_process.spawn`](http://nodejs.org/docs/v0.6.5/api/child_processes.html#child_process.spawn) plus
-a few additions specific to procstream
+a few additions specific to procstreams:
 
 `out` - Boolean that determines if the proc output is directed to the main
 process output
@@ -50,6 +49,13 @@ process. This isn't always what you want. Pass `false` here to disable.
 
 `stderr` - Stream. The stderr of the proc will be directed to this stream if
 provided
+
+
+## ProcStream
+
+The ProcStream object represents the child process that is being
+executed. It is an `EventEmitter` and it also has various methods for
+chaining procstreams together.
 
 
 ### procstream methods
@@ -63,24 +69,26 @@ be chained.
 
 Similar to node's Stream.pipe, this is modeled after unix command
 piping. The stdout of in_proc is directed to the stdin of out_proc.
-Stderr of in_proc is directed to stderr of out_proc.
+Stderr of proc1 is directed to stderr of proc2. This method chains by
+returning proc2.
 
 **proc1.then(proc2)**
 
 Like 2 commands run in succession (separated by ';'), the proc1 is run
-to completion; then proc 2 is run.
+to completion; then proc 2 is run. This method chains by
+returning proc2.
 
 **proc1.and(proc2)**
 
 Like the `&&` operator, the proc1 is run to completion; if it exits with
 a 0 error code, proc2 is run. If the error code is non-zero, proc2 is
-not run
+not run. This method chains by returning proc2.
 
 **proc1.or(proc2)**
 
 Like the `||` operator, the proc1 is run to completion; if it exits with
 a non-zero error code, proc2 is run. If the error code is zero, proc2 is
-not run.
+not run. This method chains by returning proc2.
 
 **proc.data(fn)**
 
@@ -91,12 +99,14 @@ not run.
 
 This function will cause the output of the proc to be collected and
 passed to this callback on exit. The callback receives the stdout and
-stderr of the proc.
+stderr of the proc. This method chains by
+returning the same proc.
 
 **proc.out()**
 
 Direct the stdout and stderr of the proc to the calling process. This is
-useful if you pass `out: false` as an option but want to pipe out later.
+useful if you pass `out: false` as an option but want to pipe out later. This method chains by
+returning the same proc.
 
 
 ### Why?
@@ -117,3 +127,14 @@ that enable easier scripting in javascript.
 
 * Add options for converting the format of proc output, e.g. numbers, json, etc.
 * Add better ways to take action at various events in the proc chain execution
+
+
+## The MIT License
+
+Copyright (c)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
