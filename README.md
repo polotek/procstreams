@@ -109,7 +109,7 @@ useful if you pass `out: false` as an option but want to pipe out later. This me
 returning the same proc.
 
 
-### Why?
+## Why?
 
 Shell scripting languages are extremely powerful, but they're also
 annoyingly esoteric. They're difficult to read because of the terse and
@@ -123,7 +123,7 @@ procstreams is my attempt to add some nice abstractions to the node api
 that enable easier scripting in javascript.
 
 
-### TODO
+## TODO
 
 * Add options for converting the format of proc output, e.g. numbers, json, etc.
 * Add better ways to take action at various events in the proc chain execution
