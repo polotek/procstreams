@@ -153,6 +153,8 @@ procStream._prototype = {
   , data: function data(fn) {
     this.on('_output', fn);
     this.once('start', collect)
+
+    return this;
   }
   , and: function and() {
     var args = slice.call(arguments)
