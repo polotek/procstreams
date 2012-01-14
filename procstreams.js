@@ -158,7 +158,7 @@ procStream._prototype = {
       }
     });
 
-    return new procPromise(args);
+    return dest;
   }
   , then: function then() {
     var args = slice.call(arguments)
@@ -168,7 +168,7 @@ procStream._prototype = {
       dest.resolve();
     });
 
-    return new procPromise(args);
+    return dest;
   }
   , pipe: function(cmd, args, options) {
     var source = this
@@ -196,9 +196,7 @@ procPromise._prototype = {
       return proc;
     }.bind(this));
   }
-  , reject: function() {
-
-  }
+  , reject: function() {}
 }
 inherits(procPromise, procStream, procPromise._prototype);
 
