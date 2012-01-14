@@ -1,6 +1,6 @@
 {
   "name": "procstreams"
-  , "version": "0.0.1"
+  , "version": "0.1.0"
   , "description": "a little experiment with shell scripting in node"
   , "url": "https://github.com/polotek/procstreams"
   , "keywords": [
