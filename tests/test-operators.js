@@ -51,9 +51,9 @@ exec('echo && echo pass && echo pass2', function(err, output) {
   //assert.equal('pass2', output.trim())
 
   var t = timer();
-  $p('fail', opts)
-    .or('echo pass', opts)
-    .or('echo pass2', opts)
+  $p('echo', opts)
+    .and('echo pass', opts)
+    .and('echo pass2', opts)
       .on('start', function() {
         this.stdout.on('data', function(output) {
           t.stop();
