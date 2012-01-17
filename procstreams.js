@@ -145,8 +145,6 @@ procStream._prototype = {
     this._out = true;
 
     var opts = { end: false }
-    this.stdout.pipe(process.stdout, opts);
-    this.stderr.pipe(process.stderr, opts);
 
     return this;
   }
