@@ -1,4 +1,5 @@
 var assert = require('assert')
+  , multiTimer = require(__dirname + '/timers').multiTimer
   , exec = require('child_process').exec
   , $p = require(__dirname + '/..')
 
@@ -9,18 +10,22 @@ exec('node --version', function(err, output){
   assert.equal(version, output.trim())
 
   var opts = { out: false }
+    , t = multiTimer(3)
   $p('node --version', opts)
-    .stdout.on('data', function(output) {
+    .data(function(output) {
+      t.stop()
       assert.equal(version, output.toString().trim())
     })
 
   $p('node',  '--version', opts)
-    .stdout.on('data', function(output) {
+    .data(function(output) {
+      t.stop()
       assert.equal(version, output.toString().trim())
     })
 
   $p('node',  ['--version'], opts)
-    .stdout.on('data', function(output) {
+    .data(function(output) {
+      t.stop()
       assert.equal(version, output.toString().trim())
     })
 })

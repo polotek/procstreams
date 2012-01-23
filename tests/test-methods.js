@@ -1,6 +1,6 @@
 var assert = require('assert')
   , fs = require('fs')
-  , timer = require(__dirname + '/timer')
+  , timer = require(__dirname + '/timers').timer
   , $p = require(__dirname + '/..')
   , opts = { out: false }
 

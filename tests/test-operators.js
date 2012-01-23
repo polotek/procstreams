@@ -1,5 +1,5 @@
 var assert = require('assert')
-  , timer = require(__dirname + '/timer')
+  , timer = require(__dirname + '/timers').timer
   , exec = require('child_process').exec
   , $p = require(__dirname + '/..')
   , opts = { out: false }
