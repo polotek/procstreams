@@ -127,7 +127,7 @@ function procStream(cmd, args, opts, callback) {
     proc._args = o;
   }
 
-  if(opts.out !== false) {
+  if(opts.out === true) {
     proc.out();
   }
 
