@@ -9,21 +9,20 @@ exec('node --version', function(err, output){
 
   assert.equal(version, output.trim())
 
-  var opts = { out: false }
-    , t = multiTimer(3)
-  $p('node --version', opts)
+  var t = multiTimer(3)
+  $p('node --version')
     .data(function(output) {
       t.stop()
       assert.equal(version, output.toString().trim())
     })
 
-  $p('node',  '--version', opts)
+  $p('node',  '--version')
     .data(function(output) {
       t.stop()
       assert.equal(version, output.toString().trim())
     })
 
-  $p('node',  ['--version'], opts)
+  $p('node',  ['--version'])
     .data(function(output) {
       t.stop()
       assert.equal(version, output.toString().trim())
