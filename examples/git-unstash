@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+
+/*
+ * This is a git script that makes it easier to stash and unstash
+ * multiple patches in a dirty working tree. Taken from this approach
+ * http://stackoverflow.com/questions/1360712/git-stash-cannot-apply-to-a-dirty-working-tree-please-stage-your-changes
+ *
+ * > git stash show -p [stashName] | git apply && git stash drop [stashName]
+ * $p('git stash show -p', [stashName]).pipe('git apply').and('git stash drop', [stashName]);
+ *
+ * Save this file as "git-stash" somewhere in your path. and you can do `git unstash`
+ * into a dirty working tree. Or `git unstash stash@{2}`
+ */
+
+var $p = require('../procstreams')
+  , stashName = parsed.remain && parsed.remain[0]
+
+stash = process.argv[2] || "stash@{0}"
+$p('git stash show -p', stashName)
+  .pipe('git apply')
+  .and('git stash drop', stashName)
