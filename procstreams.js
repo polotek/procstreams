@@ -12,7 +12,9 @@ function procPipe(dest, options) {
    , dest_stdout
    , dest_stderr;
 
-  if(source._piped) { throw new Error('The process has already been piped'); }
+  if(source._piped) {
+    throw new Error('The process has already been piped');
+  }
   source._piped = true;
 
   source.stdout.pipe(dest.stdin);
@@ -89,8 +91,11 @@ function normalizeArguments(cmd, args, opts, callback) {
 }
 
 function collect() {
-  var stdout = this.stdout.pipe(new Collector())
-    , stderr = this.stderr.pipe(new Collector());
+  var stdout = new Collector()
+    , stderr = new Collector();
+
+  this.stdout.pipe(stdout);
+  this.stderr.pipe(stderr);
 
   this.on('exit', function(err, signal) {
     if(err === 0) {
@@ -108,6 +113,9 @@ function procStream(cmd, args, opts, callback) {
   if((cmd === process || typeof cmd.spawn == 'function')) {
     // this is already procstream
     if(typeof cmd.pipe == 'function') {
+      if(typeof callback == 'function') {
+        cmd.on('exit', callback);
+      }
       return cmd;
     } else {
     // this is a process that needs to be enhanced
