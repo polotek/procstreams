@@ -101,6 +101,9 @@ function collect() {
     if(err === 0) {
       this.emit('_output', stdout.data, stderr.data);
     }
+		else {
+			this.emit('_error', {code: err, signal: signal}, stdout.data, stderr.data);
+		}
   }.bind(this));
 }
 
@@ -160,10 +163,20 @@ procStream._prototype = {
   }
   , data: function data(fn) {
     this.on('_output', fn);
-    this.once('start', collect)
+		if(this.listeners('start').indexOf(collect) === -1) {
+			this.once('start', collect);
+		}
 
     return this;
   }
+	, error: function error(fn) {
+		this.on('_error', fn);
+		if(this.listeners('start').indexOf(collect) === -1) {
+			this.once('start', collect);
+		}
+		
+		return this;
+	}
   , and: function and() {
     var args = slice.call(arguments)
       , dest = new procPromise(args);
