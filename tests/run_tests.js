@@ -26,13 +26,10 @@ fs.readdir('tests', function(err, testFiles) {
       chain = chain ? chain.then('node', path) : $p('node', path);
       chain.on('exit', function(code) {
         if(code) {
-					
-					console.log('fail', path);
           fails++;
         }
       });
     });
-		
   // chain now has a pipe of all test files ready to be run sequentially
   chain.on('exit', function() {
     console.log('\n' + fails + ' tests failed');

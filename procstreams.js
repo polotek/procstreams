@@ -99,7 +99,7 @@ function collect() {
 
   this.on('exit', function(err, signal) {
     if(err === 0) {
-      this.emit('_output', stderr.data, stdout.data);
+      this.emit('_output', stdout.data, stderr.data);
     }
   }.bind(this));
 }

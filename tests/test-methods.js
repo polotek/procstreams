@@ -14,9 +14,8 @@ fs.readFile('tests/fixtures/long.txt', function(err, fileData) {
 
   var t = timer()
   $p('cat tests/fixtures/long.txt')
-    .data(function(err, stdout) {
+    .data(function(stdout, stderr) {
       t.stop()
-			assert(!err, 'Did not expect any error')
       assert.equal(fileData, stdout)
     })
 })
