@@ -11,20 +11,23 @@ exec('node --version', function(err, output){
 
   var t = multiTimer(3)
   $p('node --version')
-    .data(function(output) {
+    .data(function(err, output) {
       t.stop()
+			assert(!err, 'Did not expect any error')
       assert.equal(version, output.toString().trim())
     })
 
   $p('node',  '--version')
-    .data(function(output) {
+    .data(function(err, output) {
       t.stop()
+			assert(!err, 'Did not expect any error')
       assert.equal(version, output.toString().trim())
     })
 
   $p('node',  ['--version'])
-    .data(function(output) {
+    .data(function(err, output) {
       t.stop()
+			assert(!err, 'Did not expect any error')
       assert.equal(version, output.toString().trim())
     })
 })
