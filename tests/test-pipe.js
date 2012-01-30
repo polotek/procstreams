@@ -40,12 +40,11 @@ exec('cat tests/fixtures/10lines.txt | grep "even"'
     out.writable = true
     
     var data = ''
-    out.on('data', function (buf) { data += buf })
-    
-    out.on('end', function () {
+    out.write = function (buf) { data += buf }
+    out.end = function () {
       assert.equal(data, output)
       t.stop()
-    })
+    }
     
     $p('cat tests/fixtures/10lines.txt')
       .pipe('grep even')

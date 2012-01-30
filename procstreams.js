@@ -3,7 +3,8 @@ var slice = Array.prototype.slice
   , spawn = require('child_process').spawn
   , inherits = require('inherits')
   , utils = require('./protochains')
-  , Collector = require('./collector').Collector;
+  , Collector = require('./collector').Collector
+  , Stream = require('stream').Stream;
 
 function procPipe(dest, options) {
   options = options || {}
@@ -199,6 +200,17 @@ procStream._prototype = {
     return dest;
   }
   , pipe: function(cmd, args, options) {
+    if (typeof cmd === 'object' && cmd.write) {
+      options = args || {};
+      this.stdout.pipe(cmd, { end : false });
+      this.stderr.pipe(cmd, { end : false });
+      this.on('exit', function () {
+        if (cmd.end && options.end !== false) cmd.end()
+      });
+      
+      return this;
+    }
+    
     var source = this
       , dest = procStream.apply(null, arguments);
 
