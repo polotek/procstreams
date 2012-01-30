@@ -72,7 +72,7 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
     var wcData = '';
     wc_l.write = function (buf) { wcData += buf }
     wc_l.end = function () {
-        wc_l.emit('data', wcData.split('\n').length + '\n')
+        wc_l.emit('data', (wcData.split('\n').length - 1) + '\n')
         wc_l.emit('end')
     };
     

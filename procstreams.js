@@ -208,7 +208,7 @@ procStream._prototype = {
         if (cmd.end && options.end !== false) cmd.end()
       });
       
-      return this;
+      return cmd;
     }
     
     var source = this
