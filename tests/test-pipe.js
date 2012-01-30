@@ -81,7 +81,7 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
       };
       return wc_l;
     }
-    
+
     $p('cat tests/fixtures/10lines.txt')
       .pipe('grep even')
       .pipe(getWCStream())
@@ -91,4 +91,37 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
       .pipe('grep even')
       .pipe(getWCStream())
       .pipe(getOutStream())
+})
+
+exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
+  , function(err, output) {
+    if(err) { throw err }
+    
+    var t = timers.timer()
+    var out = new Stream
+    out.writable = true
+    
+    var data = ''
+    out.write = function (buf) { data += buf }
+    out.end = function () {
+      assert.equal(data, output)
+      t.stop()
+    }
+    
+    var grep = new Stream
+    grep.writable = true
+    grep.readable = true
+    var grepData = ''
+    grep.write = function (buf) { grepData += buf }
+    grep.end = function () {
+        grep.emit('data', grepData.split('\n').filter(function (line) {
+            return line.match(/even/)
+        }).join('\n'))
+        grep.emit('end')
+    }
+    
+    $p('cat tests/fixtures/10lines.txt')
+      .pipe(grep)
+      .pipe('wc -l')
+      .pipe(out)
 })
