@@ -103,9 +103,13 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
     var grepData = ''
     grep.write = function (buf) { grepData += buf }
     grep.end = function () {
-        grep.emit('data', grepData.split('\n').filter(function (line) {
-            return line.match(/even/)
-        }).join('\n'))
+        grep.emit('data', grepData
+          .split('\n')
+          .map(function (line) { return line + '\n' })
+          .filter(function (line) { return line.match(/even/) })
+          .join('')
+        )
+        
         grep.emit('end')
     }
     

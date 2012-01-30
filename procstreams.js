@@ -200,23 +200,32 @@ procStream._prototype = {
     return dest;
   }
   , pipe: function(cmd, args, options) {
+    var source = this,
+      dest;
+    
     if (typeof cmd === 'object' && cmd.write) {
       options = args || {};
-      this.stdout.pipe(cmd, { end : false });
-      this.stderr.pipe(cmd, { end : false });
-      this.on('exit', function () {
-        if (cmd.end && options.end !== false) cmd.end()
+      
+      var dest = new EventEmitter;
+      dest.stdin = cmd;
+      dest.stdout = new Stream;
+      dest.stderr = new Stream;
+      
+      cmd.on('data', dest.stdout.emit.bind(dest.stdout, 'data'));
+      cmd.on('end', function () {
+        dest.stdout.emit('end');
+        dest.stderr.emit('end');
+        dest.emit('exit');
       });
       
-      return cmd;
+      dest = procStream.enhance(dest);
+    } else {
+      dest = procStream.apply(null, arguments);
+      if(typeof args != 'string' && !Array.isArray(args)) {
+        options = args;
+      }
     }
-    
-    var source = this
-      , dest = procStream.apply(null, arguments);
-
-    if(typeof args != 'string' && !Array.isArray(args)) {
-      options = args;
-    }
+     
     return procPipe.call(source, dest, options);
   }
 }
