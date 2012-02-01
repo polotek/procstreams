@@ -97,10 +97,16 @@ function collect() {
   this.stdout.pipe(stdout);
   this.stderr.pipe(stderr);
 
-  this.on('exit', function(err, signal) {
-    if(err === 0) {
-      this.emit('_output', stdout.data, stderr.data);
+  this.on('exit', function(errCode, signal) {
+    var err = this._err || null;
+
+    if(errCode !== 0 || signal) {
+      err = err || {}
+      err.code = errCode
+      err.signal = signal
     }
+
+    this.emit('_output', err, stdout.data, stderr.data);
   }.bind(this));
 }
 
@@ -134,6 +140,13 @@ function procStream(cmd, args, opts, callback) {
 
     proc._args = o;
   }
+
+  var onError = function(err) {
+    proc._err = err;
+    proc.emit('error', err);
+  }
+  proc.stdout.on('error', onError);
+  proc.stderr.on('error', onError);
 
   if(opts.out === true) {
     proc.out();
