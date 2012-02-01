@@ -9,7 +9,7 @@ exec('cat tests/fixtures/3lines.txt | wc -l', function(err, output) {
 
   var t = timer()
   $p('cat tests/fixtures/3lines.txt').pipe('wc -l')
-    .data(function(output) {
+    .data(function(err, output) {
       t.stop()
       assert.equal('3', output.toString().trim())
     })
@@ -24,7 +24,7 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
     $p('cat tests/fixtures/10lines.txt')
       .pipe('grep even')
       .pipe('wc -l')
-        .data(function(output) {
+        .data(function(err, output) {
           t.stop()
           assert.equal('5', output.toString().trim())
         })

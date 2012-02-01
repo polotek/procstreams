@@ -9,7 +9,7 @@ exec('echo && echo pass', function(err, output) {
 
   var t = timer()
   $p('echo').and('echo pass')
-    .data(function(output) {
+    .data(function(err, output) {
       t.stop()
       assert.equal('pass', output.toString().trim())
     })
@@ -21,7 +21,7 @@ exec('fail || echo pass', function(err, output) {
 
   var t = timer()
   $p('fail').or('echo pass')
-    .data(function(output) {
+    .data(function(err, output) {
       t.stop()
       assert.equal('pass', output.toString().trim())
     })
@@ -33,7 +33,7 @@ exec('fail; echo pass', function(err, output) {
 
   var t = timer()
   $p('fail').then('echo pass')
-    .data(function(output) {
+    .data(function(err, output) {
       t.stop()
       assert.equal('pass', output.toString().trim())
     })
@@ -47,7 +47,7 @@ exec('echo && echo pass && echo pass2', function(err, output) {
   $p('echo')
     .and('echo pass')
     .and('echo pass2')
-      .data(function(output) {
+      .data(function(err, output) {
         t.stop()
         assert.equal('pass2', output.trim())
       })
@@ -61,7 +61,7 @@ exec('fail || echo pass && echo pass2', function(err, output) {
   $p('fail')
     .or('echo pass')
     .and('echo pass2')
-      .data(function(output) {
+      .data(function(err, output) {
         t.stop()
         assert.equal('pass2', output.toString().trim())
       })
