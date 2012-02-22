@@ -9,7 +9,7 @@ exec('node --version', function(err, output){
 
   assert.equal(version, output.trim())
 
-  var t = multiTimer(3)
+  var t = multiTimer(6)
   $p('node --version')
     .data(function(err, output) {
       t.stop()
@@ -27,4 +27,16 @@ exec('node --version', function(err, output){
       t.stop()
       assert.equal(version, output.toString().trim())
     })
+
+  $p('node --version', function() {
+    t.stop()
+  })
+
+  $p('node', '--version', function() {
+    t.stop()
+  })
+
+  $p('node --version', null, null, function() {
+    t.stop()
+  })
 })
