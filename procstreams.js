@@ -5,6 +5,8 @@ var slice = Array.prototype.slice
   , utils = require('./protochains')
   , Collector = require('./collector').Collector;
 
+var nop = function() {}
+
 function procPipe(dest, options) {
   options = options || {}
 
@@ -86,7 +88,7 @@ function normalizeArguments(cmd, args, opts, callback) {
     cmd: cmd
     , args: parsedArgs
     , opts: opts
-    , callback: callback
+    , callback: callback || nop
   }
 }
 
@@ -126,9 +128,7 @@ function procStream(cmd, args, opts, callback) {
   if((cmd === process || typeof cmd.spawn == 'function')) {
     // this is already procstream
     if(typeof cmd.pipe == 'function') {
-      if(typeof callback == 'function') {
-        cmd.on('exit', callback);
-      }
+      cmd.on('exit', callback);
       return cmd;
     } else {
     // this is a process that needs to be enhanced
@@ -152,7 +152,7 @@ function procStream(cmd, args, opts, callback) {
     proc.out();
   }
 
-  if(typeof callback == 'function') { proc.on('exit', callback); }
+  proc.on('exit', callback);
 
   // TODO: This should be immediate instead of nextTick. But it fails
   // for some reason
