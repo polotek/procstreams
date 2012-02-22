@@ -115,6 +115,13 @@ function procStream(cmd, args, opts, callback) {
 
   var proc = null, o = null;
 
+  // get the args to create a new procstream
+  o = normalizeArguments(cmd, args, opts, callback);
+  cmd = o.cmd;
+  args = o.args;
+  opts = o.opts;
+  callback = o.callback;
+
   // this is a process object
   if((cmd === process || typeof cmd.spawn == 'function')) {
     // this is already procstream
@@ -128,13 +135,6 @@ function procStream(cmd, args, opts, callback) {
       proc = procStream.enhance(cmd);
     }
   } else {
-  // get the args to create a new procstream
-    o = normalizeArguments(cmd, args, opts, callback);
-    cmd = o.cmd;
-    args = o.args;
-    opts = o.opts;
-    callback = o.callback;
-
     proc = spawn(cmd, args, opts);
     proc = procStream.enhance(proc);
 
