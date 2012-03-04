@@ -43,6 +43,6 @@ exec('node does-not-exist', function(err, stdout, stderr) {
     })
 
   process.nextTick(function() {
-    proc.kill();
+    proc.kill()
   })
 })
