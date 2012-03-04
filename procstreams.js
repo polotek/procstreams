@@ -178,6 +178,11 @@ procStream._prototype = {
     return this;
   }
   , data: function data(fn) {
+    // data callback suppresses error throwing
+    if(this.listeners('error').length === 0) {
+      this.on('error', nop);
+    }
+
     this.on('_output', fn);
     this.once('start', collect)
 
