@@ -102,12 +102,6 @@ function collect() {
   this.on('exit', function(errCode, signal) {
     var err = this._err || null;
 
-    if(errCode !== 0 || signal) {
-      err = err || {}
-      err.code = errCode
-      err.signal = signal
-    }
-
     this.emit('_output', err, stdout.data, stderr.data);
   }.bind(this));
 }
@@ -126,7 +120,7 @@ function procStream(cmd, args, opts, callback) {
 
   // this is a process object
   if((cmd === process || typeof cmd.spawn == 'function')) {
-    // this is already procstream
+    // this is already a procstream
     if(typeof cmd.pipe == 'function') {
       cmd.on('exit', callback);
       return cmd;
@@ -141,12 +135,24 @@ function procStream(cmd, args, opts, callback) {
     proc._args = o;
   }
 
-  var onError = function(err) {
-    proc._err = err;
-    proc.emit('error', err);
+  var onExit = function(errCode, signal) {
+    var err = this._err || {};
+
+    if(errCode !== 0 || signal) {
+      err.code = errCode
+      err.signal = signal
+      this._err = err;
+      this.emit('error', err);
+    }
   }
-  proc.stdout.on('error', onError);
-  proc.stderr.on('error', onError);
+  proc.on('exit', onExit);
+
+  var onStreamError = function(err) {
+    this._err = err;
+    this.emit('error', err);
+  }
+  proc.stdout.on('error', onStreamError);
+  proc.stderr.on('error', onStreamError);
 
   if(opts.out === true) {
     proc.out();
