@@ -224,31 +224,49 @@ procStream._prototype = {
 
     return dest;
   }
-  , pipe: function(cmd, args, options) {
+  , pipe: function() {
     var source = this
-      , dest = procStream.apply(null, arguments);
+      , args = slice.call(arguments)
+      , dest = null;
 
-    if(typeof args != 'string' && !Array.isArray(args)) {
-      options = args;
+    if(typeof source.resolve === 'function') {
+      dest = new procPromise(args)
+
+      var realSource
+        , realDest;
+
+      source.on('start', function() {
+        realSource = this;
+        realDest = dest.resolve();
+        procPipe.call(realSource, realDest);
+      });
+    } else {
+      dest = procStream.apply(null, args);
+      procPipe.call(source, dest);
     }
-    return procPipe.call(source, dest, options);
+
+    return dest;
   }
 }
 inherits(procStream, EventEmitter, procStream._prototype);
 
 function procPromise(args) {
   this._args = args;
+  this._resolved = false;
+  this._proc = null;
 
   this.resolve = procPromise.prototype.resolve.bind(this);
   this.reject = procPromise.prototype.reject.bind(this);
 }
 procPromise._prototype = {
   resolve: function() {
-    process.nextTick(function() {
-      var proc = procStream.apply(null, this._args);
-      proc._events = utils.mixin({}, this._events);
-      return proc;
-    }.bind(this));
+    if(this._resolved) { return this._proc; }
+    this._resolved = true;
+
+    this._proc = procStream.apply(null, this._args);
+    this._proc._events = utils.mixin({}, this._events);
+
+    return this._proc;
   }
   , reject: function() {}
 }
