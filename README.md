@@ -1,6 +1,6 @@
-`procstreams` is a little experiment with shell scripting in node.
+`procstreams` is module to facilitate shell scripting in node.
 
-This is a rough first attempt. Right now all it does is make it easier
+This is the first phase. Right now all it does is make it easier
 to create child processes and compose them together in a similar way to
 unix command line scripting.
 
@@ -43,12 +43,9 @@ a few additions specific to procstreams:
 `out` - Boolean that determines if the proc output is directed to the main
 process output
 
-By default when a procstream is created, the stdout and stderr of the
+If this options is `true` (strictly), the stdout and stderr of the
 child process is directed to the stdout and stderr of the calling
-process. This isn't always what you want. Pass `false` here to disable.
-
-`stderr` - Stream. The stderr of the proc will be directed to this stream if
-provided
+process. This is false by default.
 
 
 ## ProcStream
@@ -65,12 +62,18 @@ methods takes as input a procstream or a set of arguments like the
 procstream function. Each method returns the input procstream so it can
 be chained.
 
-**proc1.pipe(proc2)**
+**proc1.pipe(proc2, options)**
 
 Similar to node's Stream.pipe, this is modeled after unix command
 piping. The stdout of in_proc is directed to the stdin of out_proc.
 Stderr of proc1 is directed to stderr of proc2. This method chains by
 returning proc2.
+
+The options object supports all of the options from [`Stream.pipe`](http://nodejs.org/docs/latest/api/stream.html#stream_stream_pipe_destination_options) plus
+a few additions specific to procstreams:
+
+`stderr` - Stream. The stderr of the proc will be directed to this stream if
+provided.
 
 **proc1.then(proc2)**
 
@@ -93,20 +96,20 @@ not run. This method chains by returning proc2.
 **proc.data(fn)**
 
     $('cat some-large-file.txt')
-      .data(function(stdout, stderr) {
+      .data(function(err, stdout, stderr) {
         // process the full output of the proc
       })
 
 This function will cause the output of the proc to be collected and
-passed to this callback on exit. The callback receives the stdout and
-stderr of the proc. This method chains by
-returning the same proc.
+passed to this callback on exit. The callback receives an error object
+as the first parameter, and the stdout and stderr of the proc. This
+method chains by returning the same proc.
 
 **proc.out()**
 
-Direct the stdout and stderr of the proc to the calling process. This is
-useful if you pass `out: false` as an option but want to pipe out later. This method chains by
-returning the same proc.
+Direct the stdout and stderr of the proc to the calling process. Use
+this if you want to forward the output from a child process to the
+main process. This method chains by returning the same proc.
 
 
 ## Why?
@@ -125,8 +128,10 @@ that enable easier scripting in javascript.
 
 ## TODO
 
+* Better `cd` support. Right now you have to pass the `cwd` option to each proc.
 * Add options for converting the format of proc output, e.g. numbers, json, etc.
 * Add better ways to take action at various events in the proc chain execution
+* Allow execution of a custom function as part of the proc chain
 
 
 ## The MIT License
