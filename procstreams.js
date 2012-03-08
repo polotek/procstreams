@@ -3,7 +3,8 @@ var slice = Array.prototype.slice
   , spawn = require('child_process').spawn
   , inherits = require('inherits')
   , utils = require('./protochains')
-  , Collector = require('./collector').Collector;
+  , Collector = require('./collector').Collector
+  , cmdparser = require('./cmdparser');
 
 var nop = function() {}
 
@@ -40,7 +41,7 @@ function procPipe(dest, options) {
 
 // TODO: make this really robust, use optimist parser?
 function parseArgs(args) {
-  return args.trim().split(/\s+/);
+  return cmdparser.parse(args.trim());
 }
 
 function normalizeArguments(cmd, args, opts, callback) {
