@@ -81,7 +81,7 @@ function normalizeArguments(cmd, args, opts, callback) {
 
     parsedArgs = cmd.concat(args);
     cmd = parsedArgs.shift();
-  } else {
+  } else if(!procStream.is(cmd)) {
     throw new Error('Invalid command');
   }
 
@@ -122,7 +122,7 @@ function procStream(cmd, args, opts, callback) {
   // this is a process object
   if((cmd === process || typeof cmd.spawn == 'function')) {
     // this is already a procstream
-    if(typeof cmd.pipe == 'function') {
+    if(procStream.is(cmd)) {
       cmd.on('exit', callback);
       return cmd;
     } else {
@@ -167,6 +167,12 @@ function procStream(cmd, args, opts, callback) {
   return proc;
 }
 procStream.enhance = utils.enhance;
+procStream.is = function(proc) {
+  if(proc) {
+    return typeof proc.spawn == 'function' && proc.pipe == 'function';
+  }
+  return false;
+}
 procStream._prototype = {
   out: function out() {
     if(this._out) { return; }
