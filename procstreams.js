@@ -8,6 +8,16 @@ var slice = Array.prototype.slice
 
 var nop = function() {}
 
+var isProcess = function(cmd) {
+  if(cmd === process) { return true; }
+
+  return cmd && typeof cmd.spawn == 'function';
+}
+
+var isStream = function(cmd) {
+  return cmd && typeof cmd.pipe == 'function' && !procStream.is(cmd);
+}
+
 function procPipe(dest, options) {
   options = options || {}
 
@@ -120,7 +130,7 @@ function procStream(cmd, args, opts, callback) {
   callback = o.callback;
 
   // this is a process object
-  if((cmd === process || typeof cmd.spawn == 'function')) {
+  if(isProcess(cmd)) {
     // this is already a procstream
     if(procStream.is(cmd)) {
       cmd.on('exit', callback);
@@ -169,10 +179,12 @@ function procStream(cmd, args, opts, callback) {
 procStream.enhance = utils.enhance;
 procStream.is = function(proc) {
   if(proc) {
-    return typeof proc.spawn == 'function' && proc.pipe == 'function';
+    return typeof proc.spawn == 'function' && typeof proc.pipe == 'function';
   }
   return false;
 }
+procStream.isProcess = isProcess;
+procStream.isStream = isStream;
 procStream._prototype = {
   out: function out() {
     if(this._out) { return; }
