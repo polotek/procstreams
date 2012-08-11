@@ -5,7 +5,7 @@ var assert = require('assert')
 
 var version = process.version
 exec('node --version', function(err, output){
-  if(err) { throw err }
+  assert.ifError(err)
 
   assert.equal(version, output.trim())
 

@@ -4,7 +4,7 @@ var assert = require('assert')
   , $p = require(__dirname + '/..')
 
 exec('cat tests/fixtures/3lines.txt | wc -l', function(err, output) {
-  if(err) { throw err }
+  assert.ifError(err)
   assert.equal('3', output.trim())
 
   var t = timer()
@@ -17,7 +17,7 @@ exec('cat tests/fixtures/3lines.txt | wc -l', function(err, output) {
 
 exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
   , function(err, output) {
-    if(err) { throw err }
+    assert.ifError(err)
     assert.equal('5', output.trim())
 
     var t = timer()

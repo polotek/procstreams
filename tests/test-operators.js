@@ -4,7 +4,7 @@ var assert = require('assert')
   , $p = require(__dirname + '/..')
 
 exec('echo && echo pass', function(err, output) {
-  if(err) { throw err }
+  assert.ifError(err)
   assert.equal('pass', output.trim())
 
   var t = timer()
@@ -16,7 +16,7 @@ exec('echo && echo pass', function(err, output) {
 })
 
 exec('fail || echo pass', function(err, output) {
-  if(err) { throw err }
+  assert.ifError(err)
   assert.equal('pass', output.trim())
 
   var t = timer()
@@ -30,7 +30,7 @@ exec('fail || echo pass', function(err, output) {
 })
 
 exec('fail; echo pass', function(err, output) {
-  if(err) { throw err }
+  assert.ifError(err)
   assert.equal('pass', output.trim())
 
   var t = timer()
@@ -44,7 +44,7 @@ exec('fail; echo pass', function(err, output) {
 })
 
 exec('echo && echo pass && echo pass2', function(err, output) {
-  if(err) { throw err }
+  assert.ifError(err)
   //assert.equal('pass2', output.trim())
 
   var t = timer()
@@ -58,7 +58,7 @@ exec('echo && echo pass && echo pass2', function(err, output) {
 })
 
 exec('fail || echo pass && echo pass2', function(err, output) {
-  if(err) { throw err }
+  assert.ifError(err)
   //assert.equal('pass2', output.trim())
 
   var t = timer()

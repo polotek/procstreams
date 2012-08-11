@@ -10,7 +10,7 @@ process.stdout.on('data', function(d) {
 })
 
 fs.readFile('tests/fixtures/long.txt', function(err, fileData) {
-  if(err) { throw err }
+  assert.ifError(err)
 
   var t = timer()
   $p('cat tests/fixtures/long.txt')
@@ -21,6 +21,6 @@ fs.readFile('tests/fixtures/long.txt', function(err, fileData) {
 })
 
 exec('node tests/bin/out-test.js', function(err, output) {
-  if(err) { throw err }
+  assert.ifError(err)
   assert.equal('output 3', output.trim())
 })
