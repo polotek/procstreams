@@ -22,7 +22,7 @@ exec('node does-not-exist', function(err, stdout, stderr) {
     .on('error', function(_err) {
       err = _err
     })
-    .on('exit', function(errCode) {
+    .on('close', function(errCode) {
       t.stop()
       assert.ok(err)
       assert.notStrictEqual(0, err.code)
@@ -35,7 +35,7 @@ exec('node does-not-exist', function(err, stdout, stderr) {
     .on('error', function(_err) {
       err = _err
     })
-    .on('exit', function(errCode, signal) {
+    .on('close', function(errCode, signal) {
       t.stop()
       assert.ok(err)
       assert.ok(err.signal)
