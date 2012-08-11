@@ -12,7 +12,7 @@ $p('echo one')
   .and('echo three')
     .data(function(err, stdout, stderr) {
       t.stop()
-      assert.equal('three', stdout.trim())
+      assert.equal('three', stdout.toString().trim())
     })
 
 $p('echo one')
@@ -20,7 +20,7 @@ $p('echo one')
   .or('echo three')
     .data(function(err, stdout, stderr) {
       t.stop()
-      assert.equal('three', stdout.trim())
+      assert.equal('three', stdout.toString().trim())
     })
 
 $p('echo one')
@@ -28,7 +28,7 @@ $p('echo one')
   .then('echo three')
     .data(function(err, stdout, stderr) {
       t.stop()
-      assert.equal('three', stdout.trim())
+      assert.equal('three', stdout.toString().trim())
     })
 
 var outProc
@@ -51,5 +51,5 @@ $p('echo one')
   .pipe('cat')
     .data(function(err, stdout, stderr) {
       t.stop()
-      assert.equal('three', stdout.trim())
+      assert.equal('three', stdout.toString().trim())
     })

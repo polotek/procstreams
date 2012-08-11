@@ -7,7 +7,7 @@ var version = process.version
 exec('node --version', function(err, output){
   assert.ifError(err)
 
-  assert.equal(version, output.trim())
+  assert.equal(version, output.toString().trim())
 
   var t = multiTimer(3)
   $p('node --version')

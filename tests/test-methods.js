@@ -22,5 +22,5 @@ fs.readFile('tests/fixtures/long.txt', function(err, fileData) {
 
 exec('node tests/bin/out-test.js', function(err, output) {
   assert.ifError(err)
-  assert.equal('output 3', output.trim())
+  assert.equal('output 3', output.toString().trim())
 })
