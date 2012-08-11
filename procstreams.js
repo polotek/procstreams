@@ -91,6 +91,8 @@ function normalizeArguments(cmd, args, opts, callback) {
 
     parsedArgs = cmd.concat(args);
     cmd = parsedArgs.shift();
+  } else if(isStream(cmd)) {
+    throw new Error('piping procstream to stream is not supported yet');
   } else if(!procStream.is(cmd)) {
     throw new Error('Invalid command');
   }
@@ -139,6 +141,9 @@ function procStream(cmd, args, opts, callback) {
     // this is a process that needs to be enhanced
       proc = procStream.enhance(cmd);
     }
+  } else if(isStream(cmd)) {
+    // TODO: do something sensible here
+    throw new Error('piping procstream to stream is not supported yet');
   } else {
     proc = spawn(cmd, args, opts);
     proc = procStream.enhance(proc);
