@@ -114,7 +114,7 @@ function collect() {
   this.stdout.pipe(stdout);
   this.stderr.pipe(stderr);
 
-  this.on('exit', function(errCode, signal) {
+  this.on('close', function(errCode, signal) {
     var err = this._err || null;
 
     this.emit('_output', err, stdout.getData(), stderr.getData());
@@ -137,7 +137,7 @@ function procStream(cmd, args, opts, callback) {
   if(isProcess(cmd)) {
     // this is already a procstream
     if(procStream.is(cmd)) {
-      cmd.on('exit', callback);
+      cmd.on('close', callback);
       return cmd;
     } else {
     // this is a process that needs to be enhanced
@@ -163,7 +163,7 @@ function procStream(cmd, args, opts, callback) {
       this.emit('error', err);
     }
   }
-  proc.on('exit', onExit);
+  proc.on('close', onExit);
 
   var onStreamError = function(err) {
     this._err = err;
@@ -176,7 +176,7 @@ function procStream(cmd, args, opts, callback) {
     proc.out();
   }
 
-  proc.on('exit', callback);
+  proc.on('close', callback);
 
   // TODO: This should be immediate instead of nextTick. But it fails
   // for some reason
@@ -220,7 +220,7 @@ procStream._prototype = {
     var args = slice.call(arguments)
       , dest = new procPromise(args);
 
-    this.on('exit', function(code, signal) {
+    this.on('close', function(code, signal) {
       if(code === 0) {
         dest.resolve(args);
       }
@@ -232,7 +232,7 @@ procStream._prototype = {
     var args = slice.call(arguments)
       , dest = new procPromise(args);
 
-    this.on('exit', function(code, signal) {
+    this.on('close', function(code, signal) {
       if(code !== 0) {
         dest.resolve();
       }
@@ -244,7 +244,7 @@ procStream._prototype = {
     var args = slice.call(arguments)
       , dest = new procPromise(args);
 
-    this.on('exit', function(code, signal) {
+    this.on('close', function(code, signal) {
       dest.resolve();
     });
 
