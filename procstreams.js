@@ -250,10 +250,9 @@ procStream._prototype = {
 
     return dest;
   }
-  , pipe: function() {
+  , pipe: function(dest) {
     var source = this
-      , args = slice.call(arguments)
-      , dest = null;
+      , args = slice.call(arguments);
 
     if(typeof source.resolve === 'function') {
       dest = new procPromise(args)
@@ -267,7 +266,15 @@ procStream._prototype = {
         // to the real proc.
         realSource = this;
         realDest = dest.resolve();
-        procPipe.call(realSource, realDest);
+        realSource.pipe(realDest);
+      });
+    } else if(isStream(dest)) {
+      procPipe.call(source, {
+        // pipe directly to the stream
+        stdin: dest
+        // stub some methods for compatibility
+        , emit: nop
+        , on: nop
       });
     } else {
       dest = procStream.apply(null, args);
