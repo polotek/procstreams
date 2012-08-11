@@ -62,7 +62,7 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
     var data = ''
     out.write = function (buf) { data += buf }
     out.end = function () {
-      assert.equal(data, output)
+      assert.equal(data, output.toString().trim())
       t.stop()
     }
     
@@ -72,7 +72,7 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
     var wcData = '';
     wc_l.write = function (buf) { wcData += buf }
     wc_l.end = function () {
-        wc_l.emit('data', wcData.split('\n').length + '\n')
+        wc_l.emit('data', wcData.trim().split('\n').length)
         wc_l.emit('end')
     };
     
