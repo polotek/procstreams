@@ -6,7 +6,7 @@ var slice = Array.prototype.slice
   , inherits = require('inherits')
   , parse = require('shell-quote').parse
   , utils = require('./protochains')
-  , Collector = require('./collector').Collector;
+  , Collector = require('data-collector-stream');
 
 var nop = function() {}
 
@@ -117,7 +117,7 @@ function collect() {
   this.on('exit', function(errCode, signal) {
     var err = this._err || null;
 
-    this.emit('_output', err, stdout.data, stderr.data);
+    this.emit('_output', err, stdout.getData(), stderr.getData());
   }.bind(this));
 }
 
@@ -211,7 +211,7 @@ procStream._prototype = {
       this.on('error', nop);
     }
 
-    this.on('_output', fn);
+    this.once('_output', fn);
     this.once('start', collect)
 
     return this;
