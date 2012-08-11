@@ -1,5 +1,5 @@
 var assert = require('assert')
-  , timer = require('./timers').timer
+  , timers = require('./timers')
   , exec = require('child_process').exec
   , $p = require(__dirname + '/..')
   , Stream = require('stream').Stream
@@ -8,7 +8,7 @@ exec('cat tests/fixtures/3lines.txt | wc -l', function(err, output) {
   assert.ifError(err)
   assert.equal('3', output.toString().trim())
 
-  var t = timer()
+  var t = timers.timer()
   $p('cat tests/fixtures/3lines.txt').pipe('wc -l')
     .data(function(err, output) {
       t.stop()
@@ -21,7 +21,7 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
     assert.ifError(err)
     assert.equal('5', output.toString().trim())
 
-    var t = timer()
+    var t = timers.timer()
     $p('cat tests/fixtures/10lines.txt')
       .pipe('grep even')
       .pipe('wc -l')
@@ -35,7 +35,7 @@ exec('cat tests/fixtures/10lines.txt | grep "even"'
   , function(err, output) {
     if(err) { throw err }
     
-    var t = timer()
+    var t = timers.timer()
     var out = new Stream
     out.writable = true
     
@@ -55,29 +55,40 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
   , function(err, output) {
     if(err) { throw err }
     
-    var t = timer()
-    var out = new Stream
-    out.writable = true
-    
-    var data = ''
-    out.write = function (buf) { data += buf }
-    out.end = function () {
-      assert.equal(data, output.toString().trim())
-      t.stop()
+    var t = timers.multiTimer(2)
+
+    var getOutStream = function() {
+      var data = ''
+      var out = new Stream
+      out.writable = true      
+      out.write = function (buf) { data += buf }
+      out.end = function () {
+        assert.equal(data, output.toString().trim())
+        t.stop()
+      }
+      return out;
     }
-    
-    var wc_l = new Stream
-    wc_l.writable = true
-    wc_l.readable = true
-    var wcData = '';
-    wc_l.write = function (buf) { wcData += buf }
-    wc_l.end = function () {
-        wc_l.emit('data', wcData.trim().split('\n').length)
-        wc_l.emit('end')
-    };
+
+    var getWCStream = function() {
+      var wcData = '';
+      var wc_l = new Stream
+      wc_l.writable = true
+      wc_l.readable = true
+      wc_l.write = function (buf) { wcData += buf }
+      wc_l.end = function () {
+          wc_l.emit('data', wcData.trim().split('\n').length)
+          wc_l.emit('end')
+      };
+      return wc_l;
+    }
     
     $p('cat tests/fixtures/10lines.txt')
       .pipe('grep even')
-      .pipe(wc_l)
-      .pipe(out)
+      .pipe(getWCStream())
+      .pipe(getOutStream())
+
+    $p('echo pass').and('cat tests/fixtures/10lines.txt')
+      .pipe('grep even')
+      .pipe(getWCStream())
+      .pipe(getOutStream())
 })
