@@ -9,7 +9,7 @@ exec('node --version', function(err, output){
 
   assert.equal(version, output.trim())
 
-  var t = multiTimer(6)
+  var t = multiTimer(8)
   $p('node --version')
     .data(function(err, output) {
       t.stop()
@@ -39,4 +39,16 @@ exec('node --version', function(err, output){
   $p('node --version', null, null, function() {
     t.stop()
   })
+
+  $p('echo "new\nline"')
+    .data(function(err, output) {
+      t.stop()
+      assert.equal('new\nline', output.toString().trim())
+    })
+
+  $p('echo "foo" "bar baz" \'fizz buzz\'')
+    .data(function(err, output) {
+      t.stop()
+      assert.equal('foo bar baz fizz buzz', output.toString().trim())
+    })
 })

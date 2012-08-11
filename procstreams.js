@@ -2,6 +2,7 @@ var slice = Array.prototype.slice
   , EventEmitter = require('events').EventEmitter
   , spawn = require('child_process').spawn
   , inherits = require('inherits')
+  , parse = require('shell-quote').parse
   , utils = require('./protochains')
   , Collector = require('./collector').Collector;
 
@@ -40,7 +41,7 @@ function procPipe(dest, options) {
 
 // TODO: make this really robust, use optimist parser?
 function parseArgs(args) {
-  return args.trim().split(/\s+/);
+  return parse(args.trim());
 }
 
 function normalizeArguments(cmd, args, opts, callback) {
@@ -236,6 +237,9 @@ procStream._prototype = {
         , realDest;
 
       source.on('start', function() {
+        // FIXME: This is tricky. When "start" is fired
+        // this handler has been moved from the promise
+        // to the real proc.
         realSource = this;
         realDest = dest.resolve();
         procPipe.call(realSource, realDest);
