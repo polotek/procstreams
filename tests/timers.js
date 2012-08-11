@@ -1,7 +1,7 @@
 exports.timer = function(delay, msg) {
     var t = {
       stop: function() {
-        clearTimeout(this._id)
+        clearTimeout(t._id)
       }
     }
     t._id = setTimeout(function() {
