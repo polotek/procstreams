@@ -56,8 +56,8 @@ var create = function(parent, ctor) {
   return Object.create(obj);
 }
 
-var enhance = function(o) {
-  return extend(o, this.prototype)
+var enhance = function(o, plus) {
+  return extend(o, this.prototype, plus);
 }
 
 exports.mixin = mixin;
