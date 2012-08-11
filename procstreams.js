@@ -1,3 +1,5 @@
+require('./compat');
+
 var slice = Array.prototype.slice
   , EventEmitter = require('events').EventEmitter
   , spawn = require('child_process').spawn
