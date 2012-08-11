@@ -2,6 +2,7 @@ require('./compat');
 
 var slice = Array.prototype.slice
   , EventEmitter = require('events').EventEmitter
+  , Stream = require('stream')
   , spawn = require('child_process').spawn
   , inherits = require('inherits')
   , parse = require('shell-quote').parse
@@ -93,9 +94,7 @@ function normalizeArguments(cmd, args, opts, callback) {
 
     parsedArgs = cmd.concat(args);
     cmd = parsedArgs.shift();
-  } else if(isStream(cmd)) {
-    throw new Error('piping procstream to stream is not supported yet');
-  } else if(!procStream.is(cmd)) {
+  } else if(!procStream.is(cmd) && !isStream(cmd)) {
     throw new Error('Invalid command');
   }
 
@@ -144,8 +143,7 @@ function procStream(cmd, args, opts, callback) {
       proc = procStream.enhance(cmd);
     }
   } else if(isStream(cmd)) {
-    // TODO: do something sensible here
-    throw new Error('piping procstream to stream is not supported yet');
+    proc = procStream.enhanceStream(cmd);
   } else {
     proc = spawn(cmd, args, opts);
     proc = procStream.enhance(proc);
@@ -186,9 +184,22 @@ function procStream(cmd, args, opts, callback) {
 procStream.enhance = utils.enhance;
 procStream.is = function(proc) {
   if(proc) {
-    return typeof proc.spawn == 'function' && typeof proc.pipe == 'function';
+    return typeof proc.and == 'function' && typeof proc.pipe == 'function';
   }
   return false;
+}
+procStream.enhanceStream = function(stream) {
+  var proc = procStream.enhance(new EventEmitter(), {
+    stdin: stream
+    , stdout: stream
+    , stderr: new Stream()
+  });
+
+  stream.once('end', function() {
+    proc.emit('exit', 0, null);
+    proc.emit('close', 0, null);
+  });
+  return proc;
 }
 procStream.isProcess = isProcess;
 procStream.isStream = isStream;
@@ -266,15 +277,7 @@ procStream._prototype = {
         // to the real proc.
         realSource = this;
         realDest = dest.resolve();
-        realSource.pipe(realDest);
-      });
-    } else if(isStream(dest)) {
-      procPipe.call(source, {
-        // pipe directly to the stream
-        stdin: dest
-        // stub some methods for compatibility
-        , emit: nop
-        , on: nop
+        procPipe.call(realSource, realDest);
       });
     } else {
       dest = procStream.apply(null, args);
