@@ -272,7 +272,7 @@ procStream._prototype = {
 
     return dest;
   }
-  , pipe: function(dest) {
+  , pipe: function(dest, options) {
     var source = this
       , args = slice.call(arguments);
 
@@ -288,11 +288,11 @@ procStream._prototype = {
         // to the real proc.
         realSource = this;
         realDest = dest.resolve();
-        procPipe.call(realSource, realDest);
+        procPipe.call(realSource, realDest, options);
       });
     } else {
       dest = procStream.apply(null, args);
-      procPipe.call(source, dest);
+      procPipe.call(source, dest, options);
     }
 
     return dest;
