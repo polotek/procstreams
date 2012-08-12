@@ -66,7 +66,7 @@ var getGrepStream = function(t) {
     t.stop()
     grepData = grepData.split('\n').filter(function (line) {
         return line.match(/even/)
-    }).join('\n')
+    }).join('\n') + '\n'
     grep.emit('data', grepData)
     grep.emit('end')
   }
@@ -108,12 +108,6 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
     var t = timers.multiTimer(2)
     var proc = $p('cat tests/fixtures/10lines.txt')
       .pipe(getGrepStream(t))
-    proc.stdout.on('data', function(data) {
-      console.error('proc', data.toString())
-    });
-    var wc = proc.pipe('wc -l')
-    wc.stdout.on('data', function(data) {
-      console.error('wc', data.toString())
-    });
-    wc.pipe(getOutStream(t, output))
+      .pipe('wc -l')
+      .pipe(getOutStream(t, output))
 })
