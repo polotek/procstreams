@@ -62,36 +62,68 @@ methods takes as input a procstream or a set of arguments like the
 procstream function. Each method returns the input procstream so it can
 be chained.
 
-**proc1.pipe(proc2, options)**
+**proc1.pipe(proc2)**
 
-Similar to node's Stream.pipe, this is modeled after unix command
-piping. The stdout of in_proc is directed to the stdin of out_proc.
-Stderr of proc1 is directed to stderr of proc2. This method chains by
-returning proc2.
+Similar to node's `Stream.pipe`, this is modeled after unix command
+piping. The stdout of `proc1` is directed to the stdin of `proc2`. This
+method chains by returning `proc2`.
 
-The options object supports all of the options from [`Stream.pipe`](http://nodejs.org/docs/latest/api/stream.html#stream_stream_pipe_destination_options) plus
-a few additions specific to procstreams:
+`proc2` can also be a node `Stream` object and can be interleaved with piping to
+commands:
 
-`stderr` - Stream. The stderr of the proc will be directed to this stream if
-provided.
+    var $p = require('procstreams');
+
+    $p('cat tests/fixtures/10lines.txt')
+      .pipe('grep even')
+      .pipe('wc -l')
+      .pipe(process.stdout)
+
+If your `Stream` object has a `write()` function and emits `'data'`
+events then you can interleave shell commands with streaming map
+functions:
+
+    var $p = require('../')
+    var Stream = require('stream').Stream
+
+    // build a custom stream to grep even lines from input
+    var grepEven = new Stream
+    grepEven.writable = true
+    grepEven.readable = true
+
+    var data = ''
+    grepEven.write = function (buf) { data += buf }
+    grepEven.end = function () {
+      this.emit('data', data
+        .split('\n')
+        .map(function (line) { return line + '\n' })
+        .filter(function (line) { return line.match(/even/) })
+        .join('')
+      )
+      this.emit('end')
+    }
+
+    $p('cat ../tests/fixtures/10lines.txt')
+      .pipe(grepEven)
+      .pipe('wc -l')
+      .pipe(process.stdout)
 
 **proc1.then(proc2)**
 
-Like 2 commands run in succession (separated by ';'), the proc1 is run
-to completion; then proc 2 is run. This method chains by
-returning proc2.
+Like 2 commands run in succession (separated by ';'), `proc1` is run to
+completion; then `proc2` is run. This method chains by returning
+`proc2`.
 
 **proc1.and(proc2)**
 
-Like the `&&` operator, the proc1 is run to completion; if it exits with
-a 0 error code, proc2 is run. If the error code is non-zero, proc2 is
-not run. This method chains by returning proc2.
+Like the `&&` operator, `proc1` is run to completion; if it exits with a
+0 error code, `proc2` is run. If the error code is non-zero, `proc2` is
+not run. This method chains by returning `proc2`.
 
 **proc1.or(proc2)**
 
-Like the `||` operator, the proc1 is run to completion; if it exits with
-a non-zero error code, proc2 is run. If the error code is zero, proc2 is
-not run. This method chains by returning proc2.
+Like the `||` operator, `proc1` is run to completion; if it exits with a
+non-zero error code, `proc2` is run. If the error code is zero, `proc2`
+is not run. This method chains by returning `proc2`.
 
 **proc.data(fn)**
 
