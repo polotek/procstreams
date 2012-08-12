@@ -62,8 +62,8 @@ function normalizeArguments(cmd, args, opts, callback) {
   if(args) {
     // options object
     if(typeof args != 'string' && !Array.isArray(args)) {
-      opts = args;
       callback = opts;
+      opts = args;
       args = null;
     }
   }
