@@ -7,6 +7,7 @@ var slice = Array.prototype.slice
   , inherits = require('inherits')
   , parse = require('shell-quote').parse
   , utils = require('./protochains')
+  , PassThrough = require('./pass-through-stream')
   , Collector = require('data-collector-stream');
 
 var nop = function() {}
@@ -191,12 +192,18 @@ procStream.is = function(proc) {
 procStream.enhanceStream = function(stream) {
   var proc = procStream.enhance(new EventEmitter(), {
     stdin: stream
-    , stdout: stream
-    , stderr: new Stream()
+    , stdout: new PassThrough()
+    , stderr: new PassThrough()
   });
+
+  var opts = { end: false };
+  stream.pipe(proc.stdout, opts);
 
   stream.once('end', function() {
     proc.emit('exit', 0, null);
+
+    proc.stdout.end();
+    proc.stderr.end();
     proc.emit('close', 0, null);
   });
   return proc;
