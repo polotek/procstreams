@@ -16,8 +16,11 @@ exports.multiTimer = function(stops, delay, msg) {
   var t = exports.timer(delay, msg)
   t._stop = t.stop
   t.stop = function() {
-    if(!--stops) {
+    --stops
+    if(stops === 0) {
       t._stop()
+    } else if (stops < 0) {
+      throw new Error('Too many timer stops')
     }
   }
 
