@@ -44,7 +44,11 @@ function procPipe(dest, options) {
     } else {
       dest_stderr = dest.stderr;
     }
+  } else {
+    dest_stderr = process.stderr;
+  }
 
+  if(options.stderr !== false) {
     source.stderr.pipe(dest_stderr);
   }
 
