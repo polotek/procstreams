@@ -314,7 +314,7 @@ procPromise._prototype = {
     this._resolved = true;
 
     this._proc = procStream.apply(null, this._args);
-    this._proc._events = utils.mixin({}, this._events);
+    this._proc._events = utils.mixin({}, this._proc._events, this._events);
 
     return this._proc;
   }
