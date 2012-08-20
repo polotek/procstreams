@@ -16,6 +16,7 @@
     "inherits": "~1.0"
     , "shell-quote": "*"
     , "data-collector-stream": "*"
+    , "semver": "*"
   }
   , "scripts": {
     "test": "tests/run_tests.sh"

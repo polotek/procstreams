@@ -1,10 +1,9 @@
-require('./compat');
-
 var slice = Array.prototype.slice
   , EventEmitter = require('events').EventEmitter
   , Stream = require('stream')
   , spawn = require('child_process').spawn
   , inherits = require('inherits')
+  , compat = require('./compat')
   , parse = require('shell-quote').parse
   , utils = require('./protochains')
   , PassThrough = require('./pass-through-stream')
@@ -151,6 +150,7 @@ function procStream(cmd, args, opts, callback) {
     proc = procStream.enhanceStream(cmd);
   } else {
     proc = spawn(cmd, args, opts);
+    compat.fix_child_process(proc);
     proc = procStream.enhance(proc);
 
     proc._args = o;
