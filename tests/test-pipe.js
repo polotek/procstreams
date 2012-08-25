@@ -75,7 +75,7 @@ var getGrepStream = function(t) {
 
 exec('cat tests/fixtures/10lines.txt | grep "even"'
   , function(err, output) {
-    if(err) { throw err }
+    assert.ifError(err);
     
     var t = timers.timer()
 
@@ -86,7 +86,7 @@ exec('cat tests/fixtures/10lines.txt | grep "even"'
 
 exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
   , function(err, output) {
-    if(err) { throw err }
+    assert.ifError(err);
     
     var t = timers.multiTimer(2)
 
@@ -103,7 +103,7 @@ exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
 
 exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
   , function(err, output) {
-    if(err) { throw err }
+    assert.ifError(err);
     
     var t = timers.multiTimer(2)
     var proc = $p('cat tests/fixtures/10lines.txt')
