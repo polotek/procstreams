@@ -1,7 +1,3 @@
-FAILS=0
 for i in tests/test-*.js; do
-  echo $i
-  node $i || let FAILS++
-  echo "------"
+  node $i
 done
-echo "\n$FAILS tests failed"
