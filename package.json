@@ -18,6 +18,9 @@
     , "data-collector-stream": "*"
     , "semver": "*"
   }
+  , "devDependencies": {
+    "tap": "*"
+  }
   , "scripts": {
     "test": "tests/run_tests.sh"
   }
