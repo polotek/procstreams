@@ -68,7 +68,7 @@ test('proc promises', function(assert) {
 
     process.stdout.on('pipe', function(source) {
       t.stop()
-      assert.strictEqual(source, outProc.stdout)
+      assert.equal(source, outProc.stdout)
       assert.end()
     })
   })
