@@ -6,7 +6,9 @@ unix command line scripting.
 
     var $p = require('procstreams');
     $p('cat lines.txt').pipe('wc -l')
-      .data(function(stdout, stderr) {
+      .data(function(err, stdout, stderr) {
+          // handle error
+
           console.log(stdout); // prints number of lines in the file lines.txt
       });
 
@@ -129,13 +131,19 @@ is not run. This method chains by returning `proc2`.
 
     $('cat some-large-file.txt')
       .data(function(err, stdout, stderr) {
+        if(err) {
+          console.log(err.code, err.signal);
+          throw err;
+        }
         // process the full output of the proc
       })
 
 This function will cause the output of the proc to be collected and
 passed to this callback on exit. The callback receives an error object
-as the first parameter, and the stdout and stderr of the proc. This
-method chains by returning the same proc.
+as the first parameter, and the stdout and stderr of the proc. The error
+object includes a `code` property representing the exit code of the
+proc, and a `signal` property representing a signal that was used to
+exit the proc. This method chains by returning the same proc.
 
 **proc.out()**
 
