@@ -1,47 +1,46 @@
-var assert = require('assert')
+var test = require('tap').test
   , timers = require('./timers')
   , exec = require('child_process').exec
   , $p = require(__dirname + '/..')
   , Stream = require('stream').Stream
+  , Collector = require('data-collector-stream')
 
-exec('cat tests/fixtures/3lines.txt | wc -l', function(err, output) {
-  assert.ifError(err)
-  assert.equal('3', output.toString().trim())
-
-  var t = timers.timer()
-  $p('cat tests/fixtures/3lines.txt').pipe('wc -l')
-    .data(function(err, output) {
-      t.stop()
-      assert.equal('3', output.toString().trim())
-    })
-})
-
-exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
-  , function(err, output) {
+test('simple pipe', function(assert) {
+  exec('cat tests/fixtures/3lines.txt | wc -l', function(err, output) {
     assert.ifError(err)
-    assert.equal('5', output.toString().trim())
+    assert.equal('3', output.toString().trim())
 
     var t = timers.timer()
-    $p('cat tests/fixtures/10lines.txt')
-      .pipe('grep even')
-      .pipe('wc -l')
-        .data(function(err, output) {
-          t.stop()
-          assert.equal('5', output.toString().trim())
-        })
+    $p('cat tests/fixtures/3lines.txt').pipe('wc -l')
+      .data(function(err, output) {
+        assert.ifError(err)
+
+        t.stop()
+        assert.equal('3', output.toString().trim())
+        assert.end()
+      })
+  })
 })
 
-var getOutStream = function(t, output) {
-  var data = ''
-  var out = new Stream
-  out.writable = true      
-  out.write = function (buf) { data += buf }
-  out.end = function () {
-    assert.equal(data.trim(), output.toString().trim())
-    t.stop()
-  }
-  return out
-}
+test('multiple pipes', function(assert) {
+  exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
+    , function(err, output) {
+      assert.ifError(err)
+      assert.equal('5', output.toString().trim())
+
+      var t = timers.timer()
+      $p('cat tests/fixtures/10lines.txt')
+        .pipe('grep even')
+        .pipe('wc -l')
+          .data(function(err, output) {
+            assert.ifError(err)
+
+            t.stop()
+            assert.equal('5', output.toString().trim())
+            assert.end()
+          })
+    })
+})
 
 var getWCStream = function() {
   var wcData = '';
@@ -49,21 +48,24 @@ var getWCStream = function() {
   wc_l.writable = true
   wc_l.readable = true
   wc_l.write = function (buf) { wcData += buf }
-  wc_l.end = function () {
+  wc_l.end = function (data) {
+    if(data) { this.write(data) }
+
     wc_l.emit('data', wcData.trim().split('\n').length)
     wc_l.emit('end')
-  };
+  }
   return wc_l
 }
 
-var getGrepStream = function(t) {
+var getGrepStream = function() {
   var grep = new Stream
   grep.writable = true
   grep.readable = true
   var grepData = ''
   grep.write = function (buf) { grepData += buf }
-  grep.end = function () {
-    t.stop()
+  grep.end = function (data) {
+    if(data) { this.write(data) }
+
     grepData = grepData.split('\n').filter(function (line) {
         return line.match(/even/)
     }).join('\n') + '\n'
@@ -73,41 +75,77 @@ var getGrepStream = function(t) {
   return grep
 }
 
-exec('cat tests/fixtures/10lines.txt | grep "even"'
-  , function(err, output) {
-    assert.ifError(err);
-    
-    var t = timers.timer()
+test('pipe to a stream', function(assert) {
+  exec('cat tests/fixtures/10lines.txt | grep "even"'
+    , function(err, output) {
+      assert.ifError(err);
+      
+      var t = timers.timer()
+      $p('cat tests/fixtures/10lines.txt')
+        .pipe('grep even')
+        .pipe(new Collector())
+          .data(function(err, stdout) {
+            assert.ifError(err)
 
-    $p('cat tests/fixtures/10lines.txt')
-      .pipe('grep even')
-      .pipe(getOutStream(t, output))
+            t.stop()
+            assert.equal(stdout.toString().trim(), output.toString().trim())
+            assert.end()
+          })
+    })
 })
 
-exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
-  , function(err, output) {
-    assert.ifError(err);
-    
-    var t = timers.multiTimer(2)
+test('pipe to and from streams', function(assert) {
+  exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
+    , function(err, output) {
+      assert.ifError(err);
+      
+      var t = timers.multiTimer(2, 3000, function() {
+        assert.end()
+      })
 
-    $p('cat tests/fixtures/10lines.txt')
-      .pipe('grep even')
-      .pipe(getWCStream())
-      .pipe(getOutStream(t, output))
+      $p('cat tests/fixtures/10lines.txt')
+        .pipe('grep even')
+        .pipe(getWCStream())
+        .pipe(new Collector())
+          .data(function(err, stdout) {
+            assert.ifError(err);
 
-    $p('echo pass').and('cat tests/fixtures/10lines.txt')
-      .pipe('grep even')
-      .pipe(getWCStream())
-      .pipe(getOutStream(t, output))
+            t.stop()
+            assert.equal(stdout.toString().trim(), output.toString().trim())
+          })
+
+      $p('echo pass').and('cat tests/fixtures/10lines.txt')
+        .pipe('grep even')
+        .pipe(getWCStream())
+        .pipe(new Collector())
+          .data(function(err, stdout) {
+            assert.ifError(err);
+
+            t.stop()
+            assert.equal(stdout.toString().trim(), output.toString().trim())
+          })
+    })
 })
 
-exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
-  , function(err, output) {
-    assert.ifError(err);
-    
-    var t = timers.multiTimer(2)
-    var proc = $p('cat tests/fixtures/10lines.txt')
-      .pipe(getGrepStream(t))
-      .pipe('wc -l')
-      .pipe(getOutStream(t, output))
+test('mix stream and proc pipes', function(assert) {
+  exec('cat tests/fixtures/10lines.txt | grep "even" | wc -l'
+    , function(err, output) {
+      assert.ifError(err);
+
+      var t = timers.multiTimer(2)
+      var proc = $p('cat tests/fixtures/10lines.txt')
+        .pipe(getGrepStream())
+          .on('close', function() {
+            t.stop()
+          })
+        .pipe('wc -l')
+        .pipe(new Collector())
+          .data(function(err, stdout) {
+            assert.ifError(err);
+
+            t.stop()
+            assert.equal(stdout.toString().trim(), output.toString().trim())
+            assert.end()
+          })
+    })
 })
