@@ -1,7 +1,7 @@
 {
   "name": "procstreams"
-  , "version": "0.2.0"
-  , "description": "a little experiment with shell scripting in node"
+  , "version": "0.3.0"
+  , "description": "Enable easier shell scripting in node"
   , "url": "https://github.com/polotek/procstreams"
   , "keywords": [
     "pipe"
