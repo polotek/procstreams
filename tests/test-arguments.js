@@ -41,7 +41,7 @@ test('flexible arguments', function(assert) {
     })
 
     assert.test('argument combinations', function(assert) {
-      var t = timers.multiTimer(6, function() {
+      var t = timers.multiTimer(6, 3000, function() {
         assert.end()
       })
 
