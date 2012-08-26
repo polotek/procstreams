@@ -11,7 +11,22 @@ exports.timer = function(delay, msg) {
     return t
 }
 
-exports.multiTimer = function(stops, delay, msg) {
+exports.multiTimer = function(stops, delay, msg, callback) {
+  if(typeof msg === 'function') {
+    callback = msg
+    msg = null
+    if(typeof delay === 'string') {
+      msg = delay
+      delay = null
+    }
+  }
+
+  if(typeof delay === 'functon') {
+    callback = delay
+    msg = null
+    delay = null
+  }
+
   stops = stops || 1
   var t = exports.timer(delay, msg)
   t._stop = t.stop
@@ -19,8 +34,11 @@ exports.multiTimer = function(stops, delay, msg) {
     --stops
     if(stops === 0) {
       t._stop()
+      if(typeof callback === 'function') {
+        return callback();
+      }
     } else if (stops < 0) {
-      throw new Error('Too many timer stops')
+      throw new Error('Too many timer stops: ', msg)
     }
   }
 
