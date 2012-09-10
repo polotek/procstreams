@@ -1,4 +1,5 @@
 `procstreams` is module to facilitate shell scripting in node.
+[![Build Status](https://secure.travis-ci.org/polotek/procstreams.png)](http://travis-ci.org/polotek/procstreams)
 
 This is the first phase. Right now all it does is make it easier
 to create child processes and compose them together in a similar way to
