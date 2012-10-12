@@ -72,7 +72,7 @@ function normalizeArguments(cmd, args, opts, callback) {
   }
 
   if(opts) {
-    if(typeof opts == 'function' || typeof opts == 'string') {
+    if(typeof opts == 'function') {
       callback = opts;
       opts = {}
     }
@@ -258,8 +258,7 @@ procStream._prototype = {
   }
   , and: function and() {
     var args = slice.call(arguments)
-      , _cwd = this._cwd
-      , dest = new procPromise(args, _cwd);
+      , dest = new procPromise(args, this._cwd);
 
     this.on('close', function(code, signal) {
       if(code === 0) {
@@ -270,16 +269,8 @@ procStream._prototype = {
     return dest;
   }
   , or: function or(cmd, args, opts, cwd, callback) {
-    if(this._args.opts && this._args.opts.cwd) {
-      if(opts && !opts.cwd) {
-        opts.cwd = this._args.opts.cwd;
-      }
-      else {
-        opts = { cwd: this._args.opts.cwd }
-      }
-    }
-
-    var dest = new procPromise([ cmd, args, opts, callback ]);
+    var args = slice.call(arguments)
+      , dest = new procPromise(args, this._cwd);
 
     this.on('close', function(code, signal) {
       if(code !== 0) {
@@ -290,16 +281,8 @@ procStream._prototype = {
     return dest;
   }
   , then: function then(cmd, args, opts, callback) {
-    if(this._args.opts && this._args.opts.cwd) {
-      if(opts && !opts.cwd) {
-        opts.cwd = this._args.opts.cwd;
-      }
-      else {
-        opts = { cwd: this._args.opts.cwd }
-      }
-    }
-
-    var dest = new procPromise([ cmd, args, opts, callback ]);
+    var args = slice.call(arguments)
+      , dest = new procPromise(args, this._cwd);
 
     this.on('close', function(code, signal) {
       dest.resolve();
