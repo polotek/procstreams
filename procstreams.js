@@ -130,7 +130,7 @@ function procStream(cmd, args, opts, callback) {
   var proc = null, o = null, cwd = null;
 
   // get the args to create a new procstream
-  if(typeof cmd == 'object') {
+  if(cmd.cmd) {
     o = cmd;
     cmd = o.cmd;
     args = o.args;
