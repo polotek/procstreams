@@ -47,3 +47,23 @@ test('stderr option sends stderr to provided stream', function(assert) {
   })
   $p('node tests/bin/err-test.js').pipe('cat', { stderr: collector })
 })
+
+test('cwd option carries over from command to command', function(assert) {
+  var t = timers.timer()
+
+  var cwd = __dirname + '/fixtures/subdir'
+
+  $p('node ' + __dirname + '/bin/cwd-test.js', { cwd: cwd })
+    .data(function(err, stdout) {
+      assert.ifError(err)
+      assert.equal('subdir', stdout.toString().trim())
+    })
+    .and('node ' + __dirname + '/bin/cwd-test.js')
+    .data(function(err, stdout, stderr) {
+      assert.ifError(err)
+
+      t.stop()
+      assert.equal('subdir', stdout.toString().trim())
+      assert.end()
+    })
+})

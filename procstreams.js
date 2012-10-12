@@ -72,7 +72,7 @@ function normalizeArguments(cmd, args, opts, callback) {
   }
 
   if(opts) {
-    if(typeof opts == 'function') {
+    if(typeof opts == 'function' || typeof opts == 'string') {
       callback = opts;
       opts = {}
     }
@@ -127,19 +127,33 @@ function collect() {
 function procStream(cmd, args, opts, callback) {
   if(!cmd) { throw new Error('Missing command'); }
 
-  var proc = null, o = null;
+  var proc = null, o = null, cwd = null;
 
   // get the args to create a new procstream
-  o = normalizeArguments(cmd, args, opts, callback);
-  cmd = o.cmd;
-  args = o.args;
-  opts = o.opts;
-  callback = o.callback;
+  if(typeof cmd == 'object') {
+    o = cmd;
+    cmd = o.cmd;
+    args = o.args;
+    opts = o.opts;
+    callback = o.callback;
+  }
+  else {
+    o = normalizeArguments(cmd, args, opts, callback);
+    cmd = o.cmd;
+    args = o.args;
+    opts = o.opts;
+    callback = o.callback;
+  }
+
+  cwd = opts.cwd;
 
   // this is a process object
   if(isProcess(cmd)) {
     // this is already a procstream
     if(procStream.is(cmd)) {
+      if(cwd && !cmd._cwd) {
+        cmd._cwd = cwd;
+      }
       cmd.on('close', callback);
       return cmd;
     } else {
@@ -154,6 +168,10 @@ function procStream(cmd, args, opts, callback) {
     proc = procStream.enhance(proc);
 
     proc._args = o;
+  }
+
+  if(cwd && !proc._cwd) {
+    proc._cwd = cwd;
   }
 
   var onExit = function(errCode, signal) {
@@ -240,19 +258,28 @@ procStream._prototype = {
   }
   , and: function and() {
     var args = slice.call(arguments)
-      , dest = new procPromise(args);
+      , _cwd = this._cwd
+      , dest = new procPromise(args, _cwd);
 
     this.on('close', function(code, signal) {
       if(code === 0) {
-        dest.resolve(args);
+        dest.resolve();
       }
     });
 
     return dest;
   }
-  , or: function or() {
-    var args = slice.call(arguments)
-      , dest = new procPromise(args);
+  , or: function or(cmd, args, opts, cwd, callback) {
+    if(this._args.opts && this._args.opts.cwd) {
+      if(opts && !opts.cwd) {
+        opts.cwd = this._args.opts.cwd;
+      }
+      else {
+        opts = { cwd: this._args.opts.cwd }
+      }
+    }
+
+    var dest = new procPromise([ cmd, args, opts, callback ]);
 
     this.on('close', function(code, signal) {
       if(code !== 0) {
@@ -262,9 +289,17 @@ procStream._prototype = {
 
     return dest;
   }
-  , then: function then() {
-    var args = slice.call(arguments)
-      , dest = new procPromise(args);
+  , then: function then(cmd, args, opts, callback) {
+    if(this._args.opts && this._args.opts.cwd) {
+      if(opts && !opts.cwd) {
+        opts.cwd = this._args.opts.cwd;
+      }
+      else {
+        opts = { cwd: this._args.opts.cwd }
+      }
+    }
+
+    var dest = new procPromise([ cmd, args, opts, callback ]);
 
     this.on('close', function(code, signal) {
       dest.resolve();
@@ -300,10 +335,17 @@ procStream._prototype = {
 }
 inherits(procStream, EventEmitter, procStream._prototype);
 
-function procPromise(args) {
-  this._args = args;
+function procPromise(args, cwd) {
+  this._args = normalizeArguments.apply(null, args);
   this._resolved = false;
   this._proc = null;
+
+  if(this._args.opts.cwd) {
+    this._cwd = this._args.opts.cwd;
+  }
+  else {
+    this._args.opts.cwd = this._cwd = cwd;
+  }
 
   this.resolve = procPromise.prototype.resolve.bind(this);
   this.reject = procPromise.prototype.reject.bind(this);
@@ -313,7 +355,7 @@ procPromise._prototype = {
     if(this._resolved) { return this._proc; }
     this._resolved = true;
 
-    this._proc = procStream.apply(null, this._args);
+    this._proc = procStream.call(null, this._args);
     this._proc._events = utils.mixin({}, this._proc._events, this._events);
 
     return this._proc;
