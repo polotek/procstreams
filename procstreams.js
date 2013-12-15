@@ -140,7 +140,7 @@ function procStream(cmd, args, opts, callback) {
   if(isProcess(cmd)) {
     // this is already a procstream
     if(procStream.is(cmd)) {
-      cmd.on('close', callback);
+      cmd.on('end', callback);
       return cmd;
     } else {
     // this is a process that needs to be enhanced
@@ -179,11 +179,16 @@ function procStream(cmd, args, opts, callback) {
     proc.out();
   }
 
-  proc.on('close', callback);
+  proc.on('end', callback);
 
   // TODO: This should be immediate instead of nextTick. But it fails
   // for some reason
-  process.nextTick(function() { proc.emit('start'); });
+  process.nextTick(function() {
+    proc.emit('start');
+    proc.on('close', function(code, signal) {
+      proc.emit('end', code, signal);
+    });
+  });
   return proc;
 }
 procStream.enhance = utils.enhance;
@@ -242,7 +247,7 @@ procStream._prototype = {
     var args = slice.call(arguments)
       , dest = new procPromise(args);
 
-    this.on('close', function(code, signal) {
+    this.on('end', function(code, signal) {
       if(code === 0) {
         dest.resolve(args);
       }
@@ -254,7 +259,7 @@ procStream._prototype = {
     var args = slice.call(arguments)
       , dest = new procPromise(args);
 
-    this.on('close', function(code, signal) {
+    this.on('end', function(code, signal) {
       if(code !== 0) {
         dest.resolve();
       }
@@ -266,7 +271,7 @@ procStream._prototype = {
     var args = slice.call(arguments)
       , dest = new procPromise(args);
 
-    this.on('close', function(code, signal) {
+    this.on('end', function(code, signal) {
       dest.resolve();
     });
 

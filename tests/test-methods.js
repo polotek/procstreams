@@ -1,5 +1,6 @@
 var test = require('tap').test
   , fs = require('fs')
+  , sinon = require('sinon')
   , timers = require(__dirname + '/timers')
   , exec = require('child_process').exec
   , $p = require(__dirname + '/..')
@@ -34,4 +35,16 @@ test('out method sends stdout to process', function(assert) {
     assert.equal('output 3', output.toString().trim())
     assert.end()
   })
+})
+
+test('', function(assert) {
+  var t = timers.timer()
+  var spy = sinon.spy()
+  $p('echo 1')
+    .data(spy)
+    .on('end', function() {
+      t.stop()
+      assert.ok(spy.called);
+      assert.end()
+    })
 })
