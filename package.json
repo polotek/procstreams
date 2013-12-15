@@ -17,6 +17,7 @@
     , "shell-quote": "*"
     , "data-collector-stream": "*"
     , "semver": "*"
+    , "sinon": "*"
   }
   , "devDependencies": {
     "tap": "*"
